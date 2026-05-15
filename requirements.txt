@@ -1,0 +1,17 @@
+python-dotenv
+httpx
+PyMuPDF
+python-docx
+Pillow
+playwright
+tavily-python
+jinja2
+fastapi
+uvicorn[standard]
+websockets
+pydantic
+python-multipart
+aiofiles
+pytest
+pytest-asyncio
+openai
