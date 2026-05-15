@@ -13,7 +13,7 @@
 | M0 简历解析 | PDF/Word → 结构化 JSON | PyMuPDF + python-docx 提取，DeepSeek V4 Pro 结构化 |
 | M1 JD 识别 | 截图 → 岗位关键词 | Kimi k2.6 多模态视觉 API 解析 BOSS/猎聘截图 |
 | M2 内容生成 | 简历对齐 + PDF 导出 | DeepSeek 重写经历 (STAR 法则)，Playwright 渲染 PDF |
-| M3 面试辅助 | 自我介绍 + 公司情报 | Tavily 搜索公司动态，DeepSeek 生成 3 分钟话术 |
+| M3 面试辅助 | 自我介绍 + 公司情报 | DuckDuckGo 搜索公司动态，DeepSeek 生成 3 分钟话术 |
 
 <p align="center">
   <img src="docs/screenshots/02-result.png" alt="Result Page" width="80%">
@@ -23,7 +23,7 @@
 
 ```
 Python 3.10+  |  FastAPI  |  Jinja2  |  Tailwind CSS
-DeepSeek V4 Pro  |  Kimi k2.6  |  Tavily Search
+DeepSeek V4 Pro  |  Kimi k2.6  |  DuckDuckGo Search
 PyMuPDF  |  python-docx  |  Pillow  |  Playwright
 ```
 
@@ -53,7 +53,7 @@ cp .env.example .env
 # 编辑 .env，填入你的 API Key:
 #   DEEPSEEK_API_KEY=sk-xxx    (必填 - 简历解析/内容生成)
 #   KIMI_API_KEY=sk-xxx        (必填 - JD截图识别)
-#   TAVILY_API_KEY=tvly-xxx    (可选 - 公司情报搜索)
+#   (公司情报搜索使用免费 DuckDuckGo，无需额外 API Key)
 ```
 
 ### 4. 启动
@@ -91,7 +91,7 @@ career-sync-agent/
 │   ├── client.py           # OpenAI 兼容接口
 │   ├── fallback.py         # 多模型路由/重试
 │   └── prompts.py          # Prompt 模板
-├── search/tavily.py        # 公司情报搜索
+├── search/web.py           # 公司情报搜索 (DuckDuckGo)
 ├── templates/
 │   ├── pages/              # 前端页面 (Tailwind CSS)
 │   └── resumes/            # 简历 HTML 模板

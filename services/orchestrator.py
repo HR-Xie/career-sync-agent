@@ -81,7 +81,7 @@ class Orchestrator:
     def register_progress_callback(self, cb: Callable):
         self._progress_callbacks.append(cb)
 
-    async def run_pipeline(self, task: Task, parser, llm_router, generator, renderer, tavily_search):
+    async def run_pipeline(self, task: Task, parser, llm_router, generator, renderer, company_search):
         from services.parser import detect_file_format, extract_text_from_pdf, extract_text_from_docx, clean_extracted_text, compress_image_to_base64
         from llm.prompts import RESUME_STRUCTURING_PROMPT, JD_EXTRACTION_PROMPT
 
@@ -142,13 +142,13 @@ class Orchestrator:
             task.progress["tailored_profile"] = tailored_profile
             task.progress["resume_html"] = resume_html
 
-            # M3: Company intelligence (non-fatal: skip if Tavily key not set)
+            # M3: Company intelligence (non-fatal: skip on search error)
             task.current_step = PipelineStep.GENERATE_INTEL
             await self.on_progress(task)
 
-            company_info = "暂无公司情报（请配置 TAVILY_API_KEY 以启用此功能）"
+            company_info = "暂无公司情报（搜索失败，请检查网络连接）"
             try:
-                company_info = await tavily_search(
+                company_info = await company_search(
                     task.progress["company_name"],
                     jd_keywords.get("title", ""),
                     llm_router,
