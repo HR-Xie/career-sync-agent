@@ -34,6 +34,11 @@ manager = ConnectionManager()
 @router.websocket("/ws/{task_id}")
 async def websocket_endpoint(websocket: WebSocket, task_id: str):
     await manager.connect(task_id, websocket)
+    # Send current task status immediately on connect
+    from services.orchestrator import orchestrator
+    task = orchestrator.get_task(task_id)
+    if task:
+        await websocket.send_text(json.dumps(task.to_dict(), ensure_ascii=False))
     try:
         while True:
             await websocket.receive_text()

@@ -142,15 +142,19 @@ class Orchestrator:
             task.progress["tailored_profile"] = tailored_profile
             task.progress["resume_html"] = resume_html
 
-            # M3: Company intelligence
+            # M3: Company intelligence (non-fatal: skip if Tavily key not set)
             task.current_step = PipelineStep.GENERATE_INTEL
             await self.on_progress(task)
 
-            company_info = await tavily_search(
-                task.progress["company_name"],
-                jd_keywords.get("title", ""),
-                llm_router,
-            )
+            company_info = "暂无公司情报（请配置 TAVILY_API_KEY 以启用此功能）"
+            try:
+                company_info = await tavily_search(
+                    task.progress["company_name"],
+                    jd_keywords.get("title", ""),
+                    llm_router,
+                )
+            except Exception as e:
+                logger.warning(f"Company intelligence skipped: {e}")
             task.progress["company_info"] = company_info
 
             from services.generator import generate_self_intro_prompt
