@@ -6,7 +6,7 @@ class LLMClient:
         self.model = model
         self.client = OpenAI(api_key=api_key, base_url=base_url)
 
-    async def chat(self, system_prompt: str, user_message: str, temperature: float = 0.3) -> str:
+    async def chat(self, system_prompt: str, user_message: str, temperature: float = 1.0) -> str:
         response = self.client.chat.completions.create(
             model=self.model,
             temperature=temperature,
@@ -22,7 +22,7 @@ class LLMClient:
     ) -> str:
         response = self.client.chat.completions.create(
             model=self.model,
-            temperature=0.3,
+            temperature=temperature,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {
