@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Career-Sync Agent", lifespan=lifespan)
+app = FastAPI(title="CareerSync Agent - 智能求职助手", lifespan=lifespan)
 
 # Routes
 app.include_router(upload.router)

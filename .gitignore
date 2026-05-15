@@ -8,3 +8,8 @@ uploads/*.pdf
 uploads/*.docx
 output/*.pdf
 output/*.docx
+
+# IDE
+.idea/
+.vscode/
+.DS_Store
