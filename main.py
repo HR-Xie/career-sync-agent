@@ -41,17 +41,17 @@ templates = Jinja2Templates(directory="templates/pages")
 
 @app.get("/")
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.get("/progress/{task_id}")
 async def progress_page(request: Request, task_id: str):
-    return templates.TemplateResponse("progress.html", {"request": request, "task_id": task_id})
+    return templates.TemplateResponse(request, "progress.html", {"task_id": task_id})
 
 
 @app.get("/result/{task_id}")
 async def result_page(request: Request, task_id: str):
-    return templates.TemplateResponse("result.html", {"request": request, "task_id": task_id})
+    return templates.TemplateResponse(request, "result.html", {"task_id": task_id})
 
 
 @app.get("/api/health")
