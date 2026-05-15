@@ -4,5 +4,7 @@ __pycache__/
 .env
 uploads/
 output/
-*.pdf
-*.docx
+uploads/*.pdf
+uploads/*.docx
+output/*.pdf
+output/*.docx
