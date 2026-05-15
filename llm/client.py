@@ -18,7 +18,7 @@ class LLMClient:
         return response.choices[0].message.content or ""
 
     async def chat_with_image(
-        self, system_prompt: str, text: str, image_base64: str, content_type: str = "image/jpeg"
+        self, system_prompt: str, text: str, image_base64: str, content_type: str = "image/jpeg", temperature: float = 1.0
     ) -> str:
         response = self.client.chat.completions.create(
             model=self.model,
