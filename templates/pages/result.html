@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成结果 - Career-Sync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto py-10 px-4">
+        <h1 class="text-2xl font-bold text-center mb-10">你的求职材料已生成</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- PDF Resume Card -->
+            <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="text-4xl mb-3">&#128196;</div>
+                <h3 class="font-semibold mb-2">定制化简历 PDF</h3>
+                <p class="text-sm text-gray-500 mb-4">已根据JD关键词优化</p>
+                <a id="pdf-download" href="#" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">下载 PDF</a>
+            </div>
+
+            <!-- Self Intro Card -->
+            <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="text-4xl mb-3">&#128483;</div>
+                <h3 class="font-semibold mb-2">面试自我介绍</h3>
+                <p class="text-sm text-gray-500 mb-4">基于STAR法则，3分钟版本</p>
+                <button onclick="showModal('intro')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">查看 & 复制</button>
+            </div>
+
+            <!-- Company Report Card -->
+            <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="text-4xl mb-3">&#128270;</div>
+                <h3 class="font-semibold mb-2">公司深度情报</h3>
+                <p class="text-sm text-gray-500 mb-4">面试谈资 + 技术动态</p>
+                <button onclick="showModal('company')" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">查看 & 复制</button>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="modal-title" class="text-lg font-semibold"></h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+                <pre id="modal-content" class="text-sm text-gray-700 whitespace-pre-wrap font-sans"></pre>
+                <button onclick="copyContent()" class="mt-4 w-full bg-gray-100 py-2 rounded-lg hover:bg-gray-200">复制内容</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const taskId = window.location.pathname.split('/').pop();
+
+    fetch(`/api/result/${taskId}`)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('pdf-download').href = data.pdf_url || '#';
+            window._intro = data.self_intro || '';
+            window._company = data.company_info || '';
+        });
+
+    function showModal(type) {
+        const modal = document.getElementById('modal');
+        const title = document.getElementById('modal-title');
+        const content = document.getElementById('modal-content');
+        if (type === 'intro') {
+            title.textContent = '面试自我介绍';
+            content.textContent = window._intro;
+        } else {
+            title.textContent = '公司深度情报';
+            content.textContent = window._company;
+        }
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function copyContent() {
+        navigator.clipboard.writeText(document.getElementById('modal-content').textContent);
+        alert('已复制到剪贴板');
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>处理中 - Career-Sync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="max-w-lg w-full mx-4 bg-white rounded-xl shadow-sm p-8">
+        <h2 class="text-xl font-semibold text-center mb-8">AI 正在为你生成求职材料</h2>
+
+        <div id="steps" class="space-y-4">
+            <div id="step-M0_parse_resume" class="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                <div class="step-icon w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 text-sm font-medium">1</div>
+                <span class="text-gray-600">解析简历文件</span>
+                <div class="step-spinner ml-auto hidden w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <div class="step-check ml-auto hidden text-green-500 text-lg">&#10003;</div>
+                <div class="step-error ml-auto hidden text-red-500 text-lg">&#10007;</div>
+            </div>
+            <div id="step-M1_parse_jd" class="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                <div class="step-icon w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 text-sm font-medium">2</div>
+                <span class="text-gray-600">识别JD岗位需求</span>
+                <div class="step-spinner ml-auto hidden w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <div class="step-check ml-auto hidden text-green-500 text-lg">&#10003;</div>
+                <div class="step-error ml-auto hidden text-red-500 text-lg">&#10007;</div>
+            </div>
+            <div id="step-M2_generate" class="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                <div class="step-icon w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 text-sm font-medium">3</div>
+                <span class="text-gray-600">生成适配简历</span>
+                <div class="step-spinner ml-auto hidden w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <div class="step-check ml-auto hidden text-green-500 text-lg">&#10003;</div>
+                <div class="step-error ml-auto hidden text-red-500 text-lg">&#10007;</div>
+            </div>
+            <div id="step-M3_intelligence" class="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                <div class="step-icon w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 text-sm font-medium">4</div>
+                <span class="text-gray-600">搜索公司情报</span>
+                <div class="step-spinner ml-auto hidden w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <div class="step-check ml-auto hidden text-green-500 text-lg">&#10003;</div>
+                <div class="step-error ml-auto hidden text-red-500 text-lg">&#10007;</div>
+            </div>
+            <div id="step-render_pdf" class="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                <div class="step-icon w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 text-sm font-medium">5</div>
+                <span class="text-gray-600">导出PDF文件</span>
+                <div class="step-spinner ml-auto hidden w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <div class="step-check ml-auto hidden text-green-500 text-lg">&#10003;</div>
+                <div class="step-error ml-auto hidden text-red-500 text-lg">&#10007;</div>
+            </div>
+        </div>
+
+        <p id="error-msg" class="mt-6 text-red-500 text-center hidden"></p>
+        <button id="retry-btn" onclick="location.reload()" class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hidden hover:bg-blue-700">重试</button>
+    </div>
+
+    <script>
+    const taskId = window.location.pathname.split('/').pop();
+    const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${wsProtocol}//${location.host}/ws/${taskId}`);
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        updateStep(data.current_step);
+        if (data.status === 'completed') {
+            window.location.href = `/result/${taskId}`;
+        } else if (data.status === 'failed') {
+            document.getElementById('error-msg').textContent = '生成失败: ' + (data.error || '未知错误');
+            document.getElementById('error-msg').classList.remove('hidden');
+            document.getElementById('retry-btn').classList.remove('hidden');
+        }
+    };
+
+    function updateStep(step) {
+        const steps = ['M0_parse_resume', 'M1_parse_jd', 'M2_generate', 'M3_intelligence', 'render_pdf'];
+        let found = false;
+        steps.forEach(s => {
+            const el = document.getElementById('step-' + s);
+            if (!el) return;
+            if (s === step) {
+                found = true;
+                el.querySelector('.step-icon').classList.replace('bg-gray-200', 'bg-blue-500');
+                el.querySelector('.step-icon').classList.replace('text-gray-500', 'text-white');
+                el.querySelector('.step-spinner').classList.remove('hidden');
+                el.querySelector('.step-check').classList.add('hidden');
+            } else if (!found) {
+                el.querySelector('.step-icon').classList.replace('bg-gray-200', 'bg-green-500');
+                el.querySelector('.step-icon').classList.replace('text-gray-500', 'text-white');
+                el.querySelector('.step-spinner').classList.add('hidden');
+                el.querySelector('.step-check').classList.remove('hidden');
+            }
+        });
+    }
+
+    ws.onerror = () => {
+        document.getElementById('error-msg').textContent = 'WebSocket 连接失败，请刷新重试';
+        document.getElementById('error-msg').classList.remove('hidden');
+    };
+    </script>
+</body>
+</html>
