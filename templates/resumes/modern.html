@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ profile.name }} - 简历</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white p-8 max-w-4xl mx-auto">
+    <h1 class="text-2xl font-bold">{{ profile.name }}</h1>
+    <p class="text-gray-600">{{ profile.email }} | {{ profile.phone }}</p>
+    <p class="text-sm text-blue-600">目标岗位：{{ jd.title }}</p>
+
+    <section class="mt-6">
+        <h2 class="text-lg font-semibold border-b pb-1">技能</h2>
+        <div class="flex flex-wrap gap-2 mt-2">
+            {% for skill in profile.skills %}
+            <span class="px-2 py-1 bg-gray-100 rounded text-sm">{{ skill }}</span>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="mt-4">
+        <h2 class="text-lg font-semibold border-b pb-1">项目经历</h2>
+        {% for project in profile.projects %}
+        <div class="mt-3">
+            <h3 class="font-medium">{{ project.name }}</h3>
+            <p class="text-sm text-gray-700">{{ project.desc }}</p>
+            <div class="flex flex-wrap gap-1 mt-1">
+                {% for tech in project.tech_stack %}
+                <span class="text-xs px-1 py-0.5 bg-blue-50 text-blue-700 rounded">{{ tech }}</span>
+                {% endfor %}
+            </div>
+            <ul class="list-disc list-inside text-sm mt-1">
+                {% for achievement in project.achievements %}
+                <li>{{ achievement }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </section>
+
+    <section class="mt-4">
+        <h2 class="text-lg font-semibold border-b pb-1">工作/实习经历</h2>
+        {% for exp in profile.experience %}
+        <div class="mt-3">
+            <div class="flex justify-between">
+                <span class="font-medium">{{ exp.company }} - {{ exp.role }}</span>
+                <span class="text-sm text-gray-500">{{ exp.duration }}</span>
+            </div>
+            <ul class="list-disc list-inside text-sm mt-1">
+                {% for hl in exp.highlights %}
+                <li>{{ hl }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </section>
+
+    <section class="mt-4">
+        <h2 class="text-lg font-semibold border-b pb-1">教育背景</h2>
+        {% for edu in profile.education %}
+        <div class="mt-2 flex justify-between">
+            <span>{{ edu.school }} - {{ edu.major }} {{ edu.degree }}</span>
+            <span class="text-sm text-gray-500">{{ edu.year }}</span>
+        </div>
+        {% endfor %}
+    </section>
+</body>
+</html>
