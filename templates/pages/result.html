@@ -5,6 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>生成结果 - Career-Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Modal styles - inline fallback, no CDN dependency */
+        .my-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .my-overlay.open {
+            display: flex;
+        }
+        .my-dialog {
+            background: #fff;
+            border-radius: 12px;
+            max-width: 640px;
+            width: calc(100% - 32px);
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .my-dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 24px 12px;
+            border-bottom: 1px solid #eee;
+            flex-shrink: 0;
+        }
+        .my-dialog-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .my-close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #999;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0 4px;
+            transition: color 0.15s;
+        }
+        .my-close-btn:hover { color: #333; }
+        .my-dialog-body {
+            padding: 18px 24px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .my-dialog-body pre {
+            font-family: "PingFang SC","Microsoft YaHei",sans-serif;
+            font-size: 14px;
+            color: #374151;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 0;
+        }
+        .my-source-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #eef3ff;
+            color: #1a56db;
+            font-size: 12px;
+            border-radius: 6px;
+            margin-bottom: 14px;
+        }
+        .my-copy-btn {
+            margin-top: 16px;
+            width: 100%;
+            padding: 10px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .my-copy-btn:hover { background: #e5e7eb; }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div class="max-w-4xl mx-auto py-10 px-4">
@@ -31,22 +113,24 @@
             <div class="bg-white rounded-xl shadow-sm p-6 text-center">
                 <div class="text-4xl mb-3">&#128270;</div>
                 <h3 class="font-semibold mb-2">公司深度情报</h3>
-                <p class="text-sm text-gray-500 mb-1">面试谈资 + 技术动态</p>
-                <p id="company-source" class="text-xs text-gray-400 mb-4"></p>
+                <p class="text-sm text-gray-500 mb-4">面试谈资 + 技术动态</p>
                 <button onclick="showModal('company')" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">查看 & 复制</button>
             </div>
         </div>
+    </div>
 
-        <!-- Modal -->
-        <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-            <div class="bg-white rounded-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 id="modal-title" class="text-lg font-semibold"></h3>
-                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-                </div>
-                <pre id="modal-content" class="text-sm text-gray-700 whitespace-pre-wrap font-sans"></pre>
-                <button onclick="copyContent()" class="mt-4 w-full bg-gray-100 py-2 rounded-lg hover:bg-gray-200">复制内容</button>
+    <!-- Modal (inline styles, no Tailwind dependency) -->
+    <div id="modal" class="my-overlay">
+        <div class="my-dialog">
+            <div class="my-dialog-header">
+                <h3 id="modal-title"></h3>
+                <button class="my-close-btn" onclick="closeModal()">&times;</button>
             </div>
+            <div class="my-dialog-body">
+                <div id="modal-source" class="my-source-tag" style="display:none"></div>
+                <pre id="modal-content"></pre>
+            </div>
+            <button class="my-copy-btn" onclick="copyContent()">复制内容</button>
         </div>
     </div>
 
@@ -59,32 +143,45 @@
             document.getElementById('pdf-download').href = data.pdf_url || '#';
             window._intro = data.self_intro || '';
             window._company = data.company_info || '';
-            const sourceEl = document.getElementById('company-source');
-            if (data.company_info_source) {
-                sourceEl.textContent = '\u{1F4CD} ' + data.company_info_source;
-            }
+            window._companySource = data.company_info_source || '';
         });
 
     function showModal(type) {
-        const modal = document.getElementById('modal');
-        const title = document.getElementById('modal-title');
-        const content = document.getElementById('modal-content');
+        var overlay = document.getElementById('modal');
+        var title = document.getElementById('modal-title');
+        var content = document.getElementById('modal-content');
+        var source = document.getElementById('modal-source');
+
         if (type === 'intro') {
             title.textContent = '面试自我介绍';
             content.textContent = window._intro;
+            source.style.display = 'none';
         } else {
             title.textContent = '公司深度情报';
             content.textContent = window._company;
+            if (window._companySource) {
+                source.textContent = '\u{1F4CD} ' + window._companySource;
+                source.style.display = 'inline-block';
+            } else {
+                source.style.display = 'none';
+            }
         }
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+        overlay.classList.add('open');
     }
 
     function closeModal() {
-        const modal = document.getElementById('modal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        document.getElementById('modal').classList.remove('open');
     }
+
+    // Close on overlay click
+    document.getElementById('modal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
 
     function copyContent() {
         navigator.clipboard.writeText(document.getElementById('modal-content').textContent);
