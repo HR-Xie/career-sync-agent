@@ -147,8 +147,9 @@ class Orchestrator:
             await self.on_progress(task)
 
             company_info = "暂无公司情报（搜索失败，请检查网络连接）"
+            company_info_source = ""
             try:
-                company_info = await company_search(
+                company_info, company_info_source = await company_search(
                     task.progress["company_name"],
                     jd_keywords.get("title", ""),
                     llm_router,
@@ -156,6 +157,7 @@ class Orchestrator:
             except Exception as e:
                 logger.warning(f"Company intelligence skipped: {e}")
             task.progress["company_info"] = company_info
+            task.progress["company_info_source"] = company_info_source
 
             from services.generator import generate_self_intro_prompt
             self_intro_prompt = generate_self_intro_prompt(tailored_profile, company_info, jd_keywords)
@@ -181,6 +183,7 @@ class Orchestrator:
                 "pdf_url": f"/api/download/{task.id}",
                 "self_intro": self_intro,
                 "company_info": company_info,
+                "company_info_source": company_info_source,
             }
             await self.on_progress(task)
 

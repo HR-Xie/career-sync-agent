@@ -77,7 +77,8 @@ COMPANY_RESEARCH_PROMPT = """你是一位行业分析师。根据搜索到的公
 目标公司：{company_name}
 目标岗位：{job_title}
 
-请用Markdown格式输出，要求条理清晰、重点突出。"""
+请用Markdown格式输出，要求条理清晰、重点突出。
+请在每条关键信息后用 [来源: URL] 标注出处。"""
 
 COMPANY_RESEARCH_FALLBACK_PROMPT = """你是一位行业分析师。请根据你的知识，为目标公司生成一份公司研究报告。
 

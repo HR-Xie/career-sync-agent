@@ -70,6 +70,7 @@ async def get_task_result(task_id: str):
         "pdf_url": task.result.get("pdf_url"),
         "self_intro": task.result.get("self_intro"),
         "company_info": task.result.get("company_info"),
+        "company_info_source": task.result.get("company_info_source", ""),
         "error": task.error,
     }
 

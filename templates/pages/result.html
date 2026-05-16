@@ -31,7 +31,8 @@
             <div class="bg-white rounded-xl shadow-sm p-6 text-center">
                 <div class="text-4xl mb-3">&#128270;</div>
                 <h3 class="font-semibold mb-2">公司深度情报</h3>
-                <p class="text-sm text-gray-500 mb-4">面试谈资 + 技术动态</p>
+                <p class="text-sm text-gray-500 mb-1">面试谈资 + 技术动态</p>
+                <p id="company-source" class="text-xs text-gray-400 mb-4"></p>
                 <button onclick="showModal('company')" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">查看 & 复制</button>
             </div>
         </div>
@@ -58,6 +59,10 @@
             document.getElementById('pdf-download').href = data.pdf_url || '#';
             window._intro = data.self_intro || '';
             window._company = data.company_info || '';
+            const sourceEl = document.getElementById('company-source');
+            if (data.company_info_source) {
+                sourceEl.textContent = '\u{1F4CD} ' + data.company_info_source;
+            }
         });
 
     function showModal(type) {

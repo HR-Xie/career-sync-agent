@@ -156,7 +156,8 @@ async def search_company(company_name: str, job_title: str) -> str:
     return f"未找到关于 {company_name} 的搜索结果"
 
 
-async def search_and_summarize_company(company_name: str, job_title: str, llm_router) -> str:
+async def search_and_summarize_company(company_name: str, job_title: str, llm_router) -> tuple[str, str]:
+    """Returns (content, source_label) where source_label describes where data came from."""
     from llm.prompts import COMPANY_RESEARCH_PROMPT, COMPANY_RESEARCH_FALLBACK_PROMPT
 
     search_results = await search_company(company_name, job_title)
@@ -166,14 +167,17 @@ async def search_and_summarize_company(company_name: str, job_title: str, llm_ro
             company_name=company_name,
             job_title=job_title,
         )
+        source = "基于 AI 预训练知识生成（网络搜索不可用）"
     else:
         prompt = COMPANY_RESEARCH_PROMPT.format(
             search_results=search_results,
             company_name=company_name,
             job_title=job_title,
         )
+        source = "基于 Bing 实时网络搜索结果生成"
 
-    return await llm_router.chat(
+    content = await llm_router.chat(
         system_prompt="你是一位行业分析师。",
         user_message=prompt,
     )
+    return content, source
