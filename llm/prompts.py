@@ -12,6 +12,7 @@ JSON Schema:
   "name": "姓名",
   "email": "邮箱",
   "phone": "电话",
+  "photo": "证件照 base64 Data URI（可选，没有则为空字符串）",
   "education": [{"school": "学校", "degree": "学位", "major": "专业", "year": "时间"}],
   "skills": ["技能1", "技能2"],
   "experience": [{"company": "公司", "role": "岗位", "duration": "时间段", "highlights": ["亮点1"]}],

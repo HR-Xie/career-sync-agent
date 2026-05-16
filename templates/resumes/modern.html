@@ -22,6 +22,7 @@
 
   /* ── Header ── */
   .header {
+    position: relative;
     text-align: center;
     padding-bottom: 14px;
     margin-bottom: 18px;
@@ -47,6 +48,28 @@
     color: #1a56db;
     background: #eef3ff;
     border-radius: 10px;
+  }
+
+  /* ── Optional photo (top-right) ── */
+  .header-photo {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 30mm;
+    height: 40mm;
+    border: 1px solid #d1d5db;
+    border-radius: 2px;
+    overflow: hidden;
+    background: #f9fafb;
+  }
+  .header-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .header.with-photo {
+    padding-right: 36mm;
+    min-height: 42mm;
   }
 
   /* ── Section ── */
@@ -159,7 +182,12 @@
 <body>
 
 <!-- Header -->
-<div class="header">
+<div class="header{% if profile.photo %} with-photo{% endif %}">
+  {% if profile.photo %}
+  <div class="header-photo">
+    <img src="{{ profile.photo }}" alt="证件照">
+  </div>
+  {% endif %}
   <div class="name">{{ profile.name }}</div>
   <div class="meta">{{ profile.email }} &nbsp;·&nbsp; {{ profile.phone }}</div>
   <div class="target">目标岗位：{{ jd.title }}</div>

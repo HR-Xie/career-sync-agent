@@ -31,6 +31,7 @@ def build_resume_html(profile: dict, jd_keywords: dict) -> str:
     env = Environment(
         loader=FileSystemLoader(TEMPLATE_DIR),
         autoescape=select_autoescape(["html"]),
+        auto_reload=True,
     )
     template = env.get_template("modern.html")
     return template.render(
