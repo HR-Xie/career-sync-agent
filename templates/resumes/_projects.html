@@ -1,0 +1,28 @@
+{% if profile.projects %}
+<div class="section">
+  <div class="section-title">项目经历</div>
+  {% for proj in profile.projects %}
+  <div class="item">
+    <div class="item-head">
+      <span class="title">{{ proj.name }}</span>
+      {% if proj.year %}<span class="date">{{ proj.year }}</span>{% endif %}
+    </div>
+    {% if proj.desc %}<div class="item-sub">{{ proj.desc }}</div>{% endif %}
+    {% if proj.tech_stack %}
+    <div class="tech-tags">
+      {% for tech in proj.tech_stack %}
+      <span class="tag">{{ tech }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if proj.achievements %}
+    <ul class="bullets" style="margin-top:3px">
+      {% for a in proj.achievements %}
+      <li>{{ a }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

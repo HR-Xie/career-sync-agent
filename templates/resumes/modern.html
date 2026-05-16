@@ -165,22 +165,26 @@
   <div class="target">目标岗位：{{ jd.title }}</div>
 </div>
 
-<!-- Skills -->
-{% if profile.skills %}
+{% if is_fresh_grad %}
+<!-- ── 应届生：教育 → 技能 → 实习 → 项目 → 论文 ── -->
+
+{% if profile.education %}
 <div class="section">
-  <div class="section-title">专业技能</div>
-  <div class="skills-wrap">
-    {% for skill in profile.skills %}
-    <span class="skill-chip">{{ skill }}</span>
-    {% endfor %}
+  <div class="section-title">教育背景</div>
+  {% for edu in profile.education %}
+  <div class="edu-row">
+    <span class="school">{{ edu.school }} · {{ edu.major }} · {{ edu.degree }}</span>
+    <span class="year">{{ edu.year }}</span>
   </div>
+  {% endfor %}
 </div>
 {% endif %}
 
-<!-- Experience -->
+{% include "_skills.html" %}
+
 {% if profile.experience %}
 <div class="section">
-  <div class="section-title">工作 / 实习经历</div>
+  <div class="section-title">实习经历</div>
   {% for exp in profile.experience %}
   <div class="item">
     <div class="item-head">
@@ -199,28 +203,25 @@
 </div>
 {% endif %}
 
-<!-- Projects -->
-{% if profile.projects %}
+{% include "_projects.html" %}
+{% include "_papers.html" %}
+
+{% else %}
+<!-- ── 社招：工作经历 → 项目 → 技能 → 教育 → 论文 ── -->
+
+{% if profile.experience %}
 <div class="section">
-  <div class="section-title">项目经历</div>
-  {% for proj in profile.projects %}
+  <div class="section-title">工作经历</div>
+  {% for exp in profile.experience %}
   <div class="item">
     <div class="item-head">
-      <span class="title">{{ proj.name }}</span>
-      {% if proj.year %}<span class="date">{{ proj.year }}</span>{% endif %}
+      <span class="title">{{ exp.company }} — {{ exp.role }}</span>
+      <span class="date">{{ exp.duration }}</span>
     </div>
-    {% if proj.desc %}<div class="item-sub">{{ proj.desc }}</div>{% endif %}
-    {% if proj.tech_stack %}
-    <div class="tech-tags">
-      {% for tech in proj.tech_stack %}
-      <span class="tag">{{ tech }}</span>
-      {% endfor %}
-    </div>
-    {% endif %}
-    {% if proj.achievements %}
-    <ul class="bullets" style="margin-top:3px">
-      {% for a in proj.achievements %}
-      <li>{{ a }}</li>
+    {% if exp.highlights %}
+    <ul class="bullets">
+      {% for hl in exp.highlights %}
+      <li>{{ hl }}</li>
       {% endfor %}
     </ul>
     {% endif %}
@@ -229,7 +230,9 @@
 </div>
 {% endif %}
 
-<!-- Education -->
+{% include "_projects.html" %}
+{% include "_skills.html" %}
+
 {% if profile.education %}
 <div class="section">
   <div class="section-title">教育背景</div>
@@ -242,14 +245,8 @@
 </div>
 {% endif %}
 
-<!-- Papers -->
-{% if profile.papers %}
-<div class="section">
-  <div class="section-title">论著 / 专利</div>
-  {% for p in profile.papers %}
-  <div class="paper-item">{{ p.title }}{% if p.venue %} — {{ p.venue }}{% endif %}{% if p.year %}，{{ p.year }}{% endif %}</div>
-  {% endfor %}
-</div>
+{% include "_papers.html" %}
+
 {% endif %}
 
 </body>

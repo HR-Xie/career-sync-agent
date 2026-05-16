@@ -1,0 +1,10 @@
+{% if profile.skills %}
+<div class="section">
+  <div class="section-title">专业技能</div>
+  <div class="skills-wrap">
+    {% for skill in profile.skills %}
+    <span class="skill-chip">{{ skill }}</span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

@@ -1,0 +1,8 @@
+{% if profile.papers %}
+<div class="section">
+  <div class="section-title">论著 / 专利</div>
+  {% for p in profile.papers %}
+  <div class="paper-item">{{ p.title }}{% if p.venue %} — {{ p.venue }}{% endif %}{% if p.year %}，{{ p.year }}{% endif %}</div>
+  {% endfor %}
+</div>
+{% endif %}

@@ -1,7 +1,30 @@
 import json
+import re
+from datetime import datetime
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 TEMPLATE_DIR = "templates/resumes"
+
+
+def _is_fresh_grad(profile: dict) -> bool:
+    """Detect if candidate is a fresh graduate based on education end year."""
+    current_year = datetime.now().year
+    edu_entries = profile.get("education", [])
+    if not edu_entries:
+        # No education info and no experience → likely fresh grad
+        return not profile.get("experience")
+
+    max_year = 0
+    for edu in edu_entries:
+        year_str = edu.get("year", "")
+        years = re.findall(r"(20\d{2})", year_str)
+        if years:
+            max_year = max(max_year, max(int(y) for y in years))
+
+    if max_year == 0:
+        return not profile.get("experience")
+
+    return (current_year - max_year) <= 1
 
 
 def build_resume_html(profile: dict, jd_keywords: dict) -> str:
@@ -10,7 +33,11 @@ def build_resume_html(profile: dict, jd_keywords: dict) -> str:
         autoescape=select_autoescape(["html"]),
     )
     template = env.get_template("modern.html")
-    return template.render(profile=profile, jd=jd_keywords)
+    return template.render(
+        profile=profile,
+        jd=jd_keywords,
+        is_fresh_grad=_is_fresh_grad(profile),
+    )
 
 
 def parse_llm_json_response(text: str) -> dict:
