@@ -1,0 +1,20 @@
+{% if profile.awards or profile.certificates %}
+<div class="section">
+  {% if profile.awards %}
+  <div class="section-title">获奖荣誉</div>
+  <div class="skills-wrap">
+    {% for a in profile.awards %}
+    <span class="skill-chip">{{ a }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if profile.certificates %}
+  <div class="section-title" style="margin-top:{% if profile.awards %}8{% else %}0{% endif %}px">证书 / 资格</div>
+  <div class="skills-wrap">
+    {% for c in profile.certificates %}
+    <span class="skill-chip">{{ c }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endif %}

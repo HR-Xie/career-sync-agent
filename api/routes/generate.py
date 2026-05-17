@@ -6,8 +6,25 @@ from fastapi.responses import FileResponse
 from api.schemas import GenerateRequest
 from services.orchestrator import orchestrator
 from config import config
+from worker import execute_task
+from llm.fallback import LLMRouter
+from llm.client import LLMClient
 
 router = APIRouter()
+
+# Pre-create LLM clients (singletons, ~2s at startup instead of every request)
+_llm_router = LLMRouter(
+    primary=LLMClient(
+        api_key=config.DEEPSEEK_API_KEY,
+        base_url=config.DEEPSEEK_BASE_URL,
+        model=config.DEEPSEEK_MODEL,
+    ),
+    fallback=LLMClient(
+        api_key=config.KIMI_API_KEY,
+        base_url=config.KIMI_BASE_URL,
+        model=config.KIMI_MODEL,
+    ),
+)
 
 
 @router.post("/api/generate/{upload_id}")
@@ -15,6 +32,7 @@ async def start_generation(upload_id: str, body: GenerateRequest):
     # Find uploaded files by upload_id
     resume_path = None
     jd_path = None
+    photo_path = None
 
     for f in os.listdir(config.UPLOAD_DIR):
         if f.startswith(upload_id):
@@ -23,30 +41,14 @@ async def start_generation(upload_id: str, body: GenerateRequest):
                 resume_path = full
             elif "_jd" in f:
                 jd_path = full
+            elif "_photo" in f:
+                photo_path = full
 
-    if not resume_path or not jd_path:
+    if not resume_path:
         raise HTTPException(404, "上传文件未找到，请重新上传")
 
-    task = orchestrator.create_task(resume_path, jd_path, body.company_name)
-
-    # Launch async execution
-    from worker import execute_task
-    from llm.fallback import LLMRouter
-    from llm.client import LLMClient
-
-    primary = LLMClient(
-        api_key=config.DEEPSEEK_API_KEY,
-        base_url=config.DEEPSEEK_BASE_URL,
-        model=config.DEEPSEEK_MODEL,
-    )
-    fallback = LLMClient(
-        api_key=config.KIMI_API_KEY,
-        base_url=config.KIMI_BASE_URL,
-        model=config.KIMI_MODEL,
-    )
-    llm_router = LLMRouter(primary=primary, fallback=fallback)
-
-    asyncio.create_task(execute_task(task, llm_router))
+    task = orchestrator.create_task(resume_path, jd_path, body.company_name, photo_path)
+    asyncio.create_task(execute_task(task, _llm_router))
 
     return {"task_id": task.id}
 

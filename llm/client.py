@@ -1,13 +1,13 @@
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 
 class LLMClient:
     def __init__(self, api_key: str, base_url: str, model: str):
         self.model = model
-        self.client = OpenAI(api_key=api_key, base_url=base_url)
+        self.client = AsyncOpenAI(api_key=api_key, base_url=base_url)
 
     async def chat(self, system_prompt: str, user_message: str, temperature: float = 1.0) -> str:
-        response = self.client.chat.completions.create(
+        response = await self.client.chat.completions.create(
             model=self.model,
             temperature=temperature,
             messages=[
@@ -20,7 +20,7 @@ class LLMClient:
     async def chat_with_image(
         self, system_prompt: str, text: str, image_base64: str, content_type: str = "image/jpeg", temperature: float = 1.0
     ) -> str:
-        response = self.client.chat.completions.create(
+        response = await self.client.chat.completions.create(
             model=self.model,
             temperature=temperature,
             messages=[

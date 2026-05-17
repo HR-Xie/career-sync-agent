@@ -11,6 +11,20 @@ from config import config
 
 logger = logging.getLogger(__name__)
 
+DEBUG_DIR = "debug"
+
+
+def _save_debug(task_id: str, name: str, data: dict):
+    """Save intermediate pipeline results as JSON for debugging."""
+    try:
+        os.makedirs(DEBUG_DIR, exist_ok=True)
+        filepath = os.path.join(DEBUG_DIR, f"{task_id}_{name}.json")
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        logger.info(f"Debug saved: {filepath}")
+    except Exception as e:
+        logger.warning(f"Failed to save debug {name}: {e}")
+
 
 class TaskStatus(Enum):
     PENDING = "pending"
@@ -61,12 +75,13 @@ class Orchestrator:
         self._tasks: dict[str, Task] = {}
         self._progress_callbacks: list[Callable] = []
 
-    def create_task(self, resume_path: str, jd_image_path: str, company_name: str) -> Task:
+    def create_task(self, resume_path: str, jd_image_path: str | None = None, company_name: str = "", photo_path: str | None = None) -> Task:
         task = Task(id=str(uuid.uuid4())[:8])
         task.progress = {
             "resume_path": resume_path,
             "jd_image_path": jd_image_path,
             "company_name": company_name,
+            "photo_path": photo_path,
         }
         self._tasks[task.id] = task
         return task
@@ -107,23 +122,41 @@ class Orchestrator:
             if cleaned_json.startswith("```"):
                 cleaned_json = cleaned_json.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
             profile = json.loads(cleaned_json)
+
+            # Inject photo if uploaded
+            photo_path = task.progress.get("photo_path")
+            if photo_path and os.path.exists(photo_path):
+                try:
+                    b64, content_type = compress_image_to_base64(photo_path, max_width=180)
+                    profile["photo"] = f"data:{content_type};base64,{b64}"
+                except Exception as e:
+                    logger.warning(f"Failed to compress photo: {e}")
+
             task.progress["profile"] = profile
 
-            # M1: Parse JD image
-            task.current_step = PipelineStep.PARSE_JD
-            await self.on_progress(task)
+            # M1: Parse JD image (skip if no JD provided)
+            jd_path = task.progress.get("jd_image_path")
+            jd_keywords = {}
+            if jd_path and os.path.exists(jd_path):
+                task.current_step = PipelineStep.PARSE_JD
+                await self.on_progress(task)
 
-            b64, content_type = compress_image_to_base64(task.progress["jd_image_path"])
-            jd_json_str = await llm_router.chat_with_image(
-                system_prompt=JD_EXTRACTION_PROMPT,
-                text="请提取该JD截图中的岗位信息。",
-                image_base64=b64,
-                content_type=content_type,
-            )
-            cleaned_jd = jd_json_str.strip()
-            if cleaned_jd.startswith("```"):
-                cleaned_jd = cleaned_jd.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-            jd_keywords = json.loads(cleaned_jd)
+                b64, content_type = compress_image_to_base64(jd_path)
+                jd_json_str = await llm_router.chat_with_image(
+                    system_prompt=JD_EXTRACTION_PROMPT,
+                    text="请提取该JD截图中的岗位信息。",
+                    image_base64=b64,
+                    content_type=content_type,
+                )
+                cleaned_jd = jd_json_str.strip()
+                if cleaned_jd.startswith("```"):
+                    cleaned_jd = cleaned_jd.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+                jd_keywords = json.loads(cleaned_jd)
+
+                # DEBUG: Save JD extraction result for comparison
+                _save_debug(task.id, "jd_keywords", jd_keywords)
+            else:
+                logger.info(f"No JD image provided for task {task.id}, skipping M1")
             task.progress["jd_keywords"] = jd_keywords
 
             # M2: Generate tailored resume
@@ -138,8 +171,14 @@ class Orchestrator:
                 user_message=tailoring_prompt,
             )
             tailored_profile = parse_llm_json_response(tailored_str)
+            # Preserve photo from M0 (LLM doesn't return photo)
+            if profile.get("photo"):
+                tailored_profile["photo"] = profile["photo"]
             resume_html = build_resume_html(tailored_profile, jd_keywords)
             task.progress["tailored_profile"] = tailored_profile
+
+            # DEBUG: Save tailored profile for comparison
+            _save_debug(task.id, "tailored_profile", tailored_profile)
             task.progress["resume_html"] = resume_html
 
             # M3: Company intelligence (non-fatal: skip on search error)
@@ -150,8 +189,8 @@ class Orchestrator:
             company_info_source = ""
             try:
                 company_info, company_info_source = await company_search(
-                    task.progress["company_name"],
-                    jd_keywords.get("title", ""),
+                    task.progress.get("company_name", ""),
+                    jd_keywords.get("title", "") if jd_keywords else "",
                     llm_router,
                 )
             except Exception as e:

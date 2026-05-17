@@ -1,0 +1,20 @@
+{% if profile.campus %}
+<div class="section">
+  <div class="section-title">校园经历</div>
+  {% for c in profile.campus %}
+  <div class="item">
+    <div class="item-head">
+      <span class="title">{{ c.org }}{% if c.role %} — {{ c.role }}{% endif %}</span>
+      {% if c.duration %}<span class="date">{{ c.duration }}</span>{% endif %}
+    </div>
+    {% if c.highlights %}
+    <ul class="bullets">
+      {% for hl in c.highlights %}
+      <li>{{ hl }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

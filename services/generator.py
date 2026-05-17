@@ -52,20 +52,26 @@ def parse_llm_json_response(text: str) -> dict:
     return json.loads(text)
 
 
-def generate_tailored_prompt(profile: dict, jd_keywords: dict) -> str:
-    from llm.prompts import RESUME_TAILORING_PROMPT
-    return RESUME_TAILORING_PROMPT.format(
-        jd_keywords=json.dumps(jd_keywords, ensure_ascii=False, indent=2),
-        profile_json=json.dumps(profile, ensure_ascii=False, indent=2),
-    )
+def generate_tailored_prompt(profile: dict, jd_keywords: dict | None = None) -> str:
+    profile_json = json.dumps(profile, ensure_ascii=False, indent=2)
+    if jd_keywords:
+        from llm.prompts import RESUME_TAILORING_PROMPT
+        return RESUME_TAILORING_PROMPT.format(
+            jd_keywords=json.dumps(jd_keywords, ensure_ascii=False, indent=2),
+            profile_json=profile_json,
+        )
+    else:
+        from llm.prompts import RESUME_POLISH_PROMPT
+        return RESUME_POLISH_PROMPT.format(profile_json=profile_json)
 
 
-def generate_self_intro_prompt(tailored_resume: dict, company_info: str, jd_keywords: dict) -> str:
+def generate_self_intro_prompt(tailored_resume: dict, company_info: str, jd_keywords: dict | None = None) -> str:
     from llm.prompts import INTERVIEW_SELF_INTRO_PROMPT
+    jd_text = json.dumps(jd_keywords, ensure_ascii=False, indent=2) if jd_keywords else "（未提供JD，请基于候选人经历生成通用自我介绍）"
     return INTERVIEW_SELF_INTRO_PROMPT.format(
         tailored_resume=json.dumps(tailored_resume, ensure_ascii=False, indent=2),
         company_info=company_info,
-        jd_keywords=json.dumps(jd_keywords, ensure_ascii=False, indent=2),
+        jd_keywords=jd_text,
     )
 
 
