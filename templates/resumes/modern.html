@@ -6,13 +6,13 @@
 <style>
   @page {
     size: A4;
-    margin: 15mm 15mm 15mm 15mm;
+    margin: 12mm 14mm 12mm 14mm;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   html, body {
-    max-height: 267mm;  /* A4 297mm - 30mm margins */
+    max-height: 273mm;  /* A4 297mm - 24mm margins */
     overflow: hidden;
   }
 
@@ -29,8 +29,8 @@
   .header {
     position: relative;
     text-align: center;
-    padding-bottom: 10px;
-    margin-bottom: 12px;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
     border-bottom: 2px solid #1a56db;
   }
   .header.has-photo {
@@ -45,7 +45,7 @@
   }
   .header .meta {
     margin-top: 3px;
-    font-size: 8.5pt;
+    font-size: 10pt;
     color: #555;
     word-spacing: 6px;
   }
@@ -70,14 +70,14 @@
   }
 
   /* ── Section ── */
-  .section { margin-bottom: 10px; }
+  .section { margin-bottom: 7px; }
 
   .section-title {
     font-size: 10.5pt;
     font-weight: 700;
     color: #1a56db;
-    padding-bottom: 3px;
-    margin-bottom: 6px;
+    padding-bottom: 2px;
+    margin-bottom: 4px;
     border-bottom: 1px solid #e5e7eb;
     letter-spacing: 1px;
   }
@@ -98,7 +98,7 @@
   }
 
   /* ── Experience / Projects ── */
-  .item { margin-bottom: 8px; }
+  .item { margin-bottom: 5px; }
   .item:last-child { margin-bottom: 0; }
 
   .item-head {
@@ -203,7 +203,7 @@
 </div>
 
 {% if is_fresh_grad %}
-<!-- ── 应届生：教育 → 技能 → 实习 → 项目 → 论文 ── -->
+<!-- ── 应届生：教育 → 校园 → 实习 → 项目 → 论文 → 技能与评价 ── -->
 
 {% if profile.education %}
 <div class="section">
@@ -219,8 +219,6 @@
   {% endfor %}
 </div>
 {% endif %}
-
-{% include "_skills.html" %}
 
 {% if profile.campus %}
 {% include "_campus.html" %}
@@ -248,11 +246,11 @@
 {% endif %}
 
 {% include "_projects.html" %}
-{% include "_awards.html" %}
 {% include "_papers.html" %}
+{% include "_skill_eval.html" %}
 
 {% else %}
-<!-- ── 社招：工作经历 → 项目 → 技能 → 教育 → 论文 ── -->
+<!-- ── 社招：工作经历 → 项目 → 教育 → 论文 → 技能与评价 ── -->
 
 {% if profile.experience %}
 <div class="section">
@@ -276,7 +274,6 @@
 {% endif %}
 
 {% include "_projects.html" %}
-{% include "_skills.html" %}
 
 {% if profile.campus %}
 {% include "_campus.html" %}
@@ -297,8 +294,8 @@
 </div>
 {% endif %}
 
-{% include "_awards.html" %}
 {% include "_papers.html" %}
+{% include "_skill_eval.html" %}
 
 {% endif %}
 

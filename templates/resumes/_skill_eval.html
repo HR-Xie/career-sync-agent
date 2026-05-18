@@ -1,0 +1,25 @@
+{% if profile.skills or profile.awards or profile.certificates or profile.self_eval %}
+<div class="section">
+  <div class="section-title">技能与评价</div>
+
+  {% if profile.skills %}
+  <div class="skills-wrap" style="margin-bottom:5px">
+    {% for skill in profile.skills %}
+    <span class="skill-chip">{{ skill }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if profile.awards %}
+  <div style="font-size:8.5pt;color:#555;margin-bottom:1px"><b>获奖：</b>{{ profile.awards | join('、') }}</div>
+  {% endif %}
+
+  {% if profile.certificates %}
+  <div style="font-size:8.5pt;color:#555;margin-bottom:1px"><b>证书：</b>{{ profile.certificates | join('、') }}</div>
+  {% endif %}
+
+  {% if profile.self_eval %}
+  <div style="font-size:8.5pt;color:#555;margin-top:4px;text-align:justify">{{ profile.self_eval }}</div>
+  {% endif %}
+</div>
+{% endif %}

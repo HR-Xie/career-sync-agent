@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from llm.client import LLMClient
 
@@ -11,15 +12,19 @@ class LLMRouter:
         self.max_retries = max_retries
 
     async def _try_call(self, client: LLMClient, method: str, *args, **kwargs) -> str:
+        last_error = None
         for attempt in range(self.max_retries):
             try:
                 fn = getattr(client, method)
                 return await fn(*args, **kwargs)
             except Exception as e:
+                last_error = e
                 logger.warning(f"LLM call attempt {attempt + 1}/{self.max_retries} failed: {e}")
-                if attempt == self.max_retries - 1:
-                    raise
-        raise RuntimeError("Unexpected: all retries exhausted")
+                if attempt < self.max_retries - 1:
+                    delay = 2 ** attempt  # 1s, 2s, 4s
+                    logger.info(f"Retrying in {delay}s...")
+                    await asyncio.sleep(delay)
+        raise last_error
 
     async def chat(self, system_prompt: str, user_message: str) -> str:
         try:

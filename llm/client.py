@@ -4,7 +4,7 @@ from openai import AsyncOpenAI
 class LLMClient:
     def __init__(self, api_key: str, base_url: str, model: str):
         self.model = model
-        self.client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+        self.client = AsyncOpenAI(api_key=api_key, base_url=base_url, timeout=120.0)
 
     async def chat(self, system_prompt: str, user_message: str, temperature: float = 1.0) -> str:
         response = await self.client.chat.completions.create(
